@@ -78,6 +78,7 @@ public:
       {
         m[i].Pos = m[num].Pos;
         m[num].Speed = (m[i].Speed = (m[i].Speed * m[i].mass + m[num].Speed * m[num].mass) / (m[i].mass + m[num].mass));
+        // TODO delete m[i]
       }
   }
 };
