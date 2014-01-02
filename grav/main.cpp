@@ -1,7 +1,6 @@
+#include <windows.h>     
 #include <glut.h>
-#include <windows.h>
 #include <stdio.h>
-#include <omp.h>
 
 #include "grav.h"
 #include "molecule.h"
@@ -9,7 +8,6 @@
 #include "color.h"
 
 #define DELAY 1000
-#define NUM_OF_MOLECULES 500
 
 byte Image[HEIGHT][WIDTH][3] = {0};
 std::vector<molecule> mol;
@@ -24,58 +22,69 @@ void Draw (void)
   if (!IsPause)
   {
     glClearColor(0, 0, 0, 0);
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear (GL_COLOR_BUFFER_BIT);
 
+#if PARALLEL
 #pragma omp parallel
+#endif
     {
+#if PARALLEL
 #pragma omp for
-      for (int i = 0; i < (int)mol.size(); i++)
-        mol[i].Move(mol, delta_t);
+#endif
+      for (int i = 0; i < (int)mol.size (); i++)
+        mol[i].Move (mol, delta_t);
 
+#if PARALLEL
 #pragma omp for
-      for (int i = 0; i < (int)mol.size(); i++)
-        mol[i].update();
+#endif
+      for (int i = 0; i < (int)mol.size (); i++)
+        mol[i].update ();
+    }
 
 #if COLLISION
-#pragma omp for
-      for (int i = 0; i < (int)mol.size(); i++)
-        mol[i].collision(mol, i);
+    for (int i = 0; i < (int)mol.size (); i++)
+      mol[i].collision (mol, i);
 #endif
-    }
-     
-    for (int i = 0; i < (int)mol.size(); i++)
-    {
-      int y = (int)mol[i].Pos.Y, x = (int)mol[i].Pos.X;
 
-      if (y >= 0 && y < HEIGHT && x >= 0 && x < WIDTH)
+#if PARALLEL
+#pragma omp parallel
+#endif
+    {
+#if PARALLEL
+#pragma omp for
+#endif
+      for (int i = 0; i < (int)mol.size (); i++)
       {
-        if (Image[y][x][0] <= LOOP_COLOR_B && Image[y][x][1] <= LOOP_COLOR_G && Image[y][x][2] <= LOOP_COLOR_R)
+        int y = (int)mol[i].Pos.Y, x = (int)mol[i].Pos.X;
+
+        if (IsInField (x, y))
         {
-          Image[y][x][0] = MAIN_COLOR_B;
-          Image[y][x][1] = MAIN_COLOR_G;
-          Image[y][x][2] = MAIN_COLOR_R;
+          Image[y][x][0] = MAIN_COLOR_B + COLOR_SHIFT_B * (mol[i].mass / 1e15);
+          Image[y][x][1] = MAIN_COLOR_G + COLOR_SHIFT_G * (mol[i].mass / 1e15);
+          Image[y][x][2] = MAIN_COLOR_R + COLOR_SHIFT_R * (mol[i].mass / 1e15);
         }
-        else 
-          if (Image[y][x][0] <= COLOR_TRESHOLD_B && Image[y][x][1] <= COLOR_TRESHOLD_G && Image[y][x][2] <= COLOR_TRESHOLD_R)
-          {
-            Image[y][x][0] += COLOR_SHIFT_B;
-            Image[y][x][1] += COLOR_SHIFT_G;
-            Image[y][x][2] += COLOR_SHIFT_R;
-          }
       }
     }
-    glPixelZoom(Scale, Scale);
-    glDrawPixels(WIDTH, HEIGHT, GL_BGR_EXT, GL_UNSIGNED_BYTE, Image);
+      glPixelZoom (Scale, Scale);
+      glDrawPixels (WIDTH, HEIGHT, GL_BGR_EXT, GL_UNSIGNED_BYTE, Image);
 
-    for (int i = 0; i < (int)mol.size(); i++)
+#if PARALLEL
+#pragma omp parallel
+#endif
     {
-      int y = (int)mol[i].Pos.Y, x = (int)mol[i].Pos.X;
-
-      if (y >= 0 && y < HEIGHT && x >= 0 && x < WIDTH)
+#if PARALLEL
+#pragma omp for
+#endif
+      for (int i = 0; i < (int)mol.size (); i++)
       {
-        Image[y][x][0] = LOOP_COLOR_B;
-        Image[y][x][1] = LOOP_COLOR_G;
-        Image[y][x][2] = LOOP_COLOR_R;
+        int y = (int)mol[i].Pos.Y, x = (int)mol[i].Pos.X;
+
+        if (IsInField (x, y))
+        {
+          Image[y][x][0] = LOOP_COLOR_B;
+          Image[y][x][1] = LOOP_COLOR_G;
+          Image[y][x][2] = LOOP_COLOR_R;
+        }
       }
     }
   }
@@ -103,12 +112,33 @@ void Keyboard (byte Key, int x, int y)
 void main ( int argc, char *argv[] )
 {
   char r[30];
+  FILE *set;
+  int NumOfMolecules;
 
-  FreeConsole();
+  set = fopen ("settings.txt", "rt");
+
+  if (set == NULL)
+  {
+    FILE *f;
+
+    f = fopen ("error.txt", "wt");
+
+    fprintf (f, "error reading file!\n");
+
+    fclose (f);
+
+    return;
+  }
+
+  fscanf (set, "%d", &NumOfMolecules);
+
+  fclose (set);
+
+  FreeConsole ();
 
   sprintf_s (r, "%ldx%ld:32", WIDTH, HEIGHT);
 
-  for (int i = 0; i < NUM_OF_MOLECULES; i++)
+  for (int i = 0; i < NumOfMolecules; i++)
     mol.push_back(molecule(vec<double> (rand() % (WIDTH / 2) + (WIDTH / 4), rand() % (HEIGHT / 2) + (HEIGHT / 4)), (rand() % 10 + 2) * 1e15));
 
   glutInit (&argc, argv);

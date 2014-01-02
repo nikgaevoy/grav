@@ -73,12 +73,25 @@ public:
 
   void collision (vector<molecule> &m, int num)
   {
-    for (unsigned int i = 0; i < m.size(); i++)
-      if (i != num && abs((int)m[i].Pos.X - (int)m[num].Pos.X) < 2 && abs((int)m[i].Pos.Y - (int)m[num].Pos.Y) < 2)
+    //unsigned int i = 0;
+
+    //for (vector<molecule>::iterator it = m.begin(); it != m.end(); ++it, i++)
+    //  if (i != num && abs((int)it->Pos.X - (int)m[num].Pos.X) < 2 && abs((int)it->Pos.Y - (int)m[num].Pos.Y) < 2)
+    //  {
+    //    m[num].Pos = it->Pos;
+    //    m[num].Speed = (m[i].Speed * m[i].mass + m[num].Speed * m[num].mass) / (m[i].mass + m[num].mass);
+    //    m.erase(it);
+    //    return true;
+    //  }
+
+    //return false;
+
+    for (unsigned int i = num + 1; i < m.size (); i++)
+      if (abs ((int)m[i].Pos.X - (int)m[num].Pos.X) < 2 && abs ((int)m[i].Pos.Y - (int)m[num].Pos.Y) < 2)
       {
-        m[i].Pos = m[num].Pos;
-        m[num].Speed = (m[i].Speed = (m[i].Speed * m[i].mass + m[num].Speed * m[num].mass) / (m[i].mass + m[num].mass));
-        // TODO delete m[i]
+        vector<molecule>::iterator it = m.begin () + i;
+        m.erase (it);
+        i--;
       }
   }
 };

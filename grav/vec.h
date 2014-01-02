@@ -1,7 +1,7 @@
 #ifndef __VEC_H_
 #define __VEC_H_
 
-#include <math.h>
+#include <cmath>
 
 namespace mth
 {
