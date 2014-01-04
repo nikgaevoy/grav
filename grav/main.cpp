@@ -1,4 +1,4 @@
-#include <windows.h>     
+#include <windows.h>
 #include <glut.h>
 #include <stdio.h>
 
@@ -7,50 +7,56 @@
 #include "timer.h"
 #include "color.h"
 
-#define DELAY 1000
-
-byte Image[HEIGHT][WIDTH][3] = {0};
+byte ***Image;
 std::vector<molecule> mol;
 float Scale = 1;
 bool IsPause = 0;
+int NumOfMolecules, Width, Height;
+double Delay;
+bool Walls, Parallel, Collision;
+
+bool IsInField (int x, int y)
+{
+  return (x >= 0 && x < Width && y >= 0 && y < Height);
+}
 
 void Draw (void)
 {
   static timer maintimer;
-  double delta_t = maintimer.update() / DELAY;
+  double delta_t = maintimer.update() / Delay;
 
   if (!IsPause)
   {
     glClearColor(0, 0, 0, 0);
     glClear (GL_COLOR_BUFFER_BIT);
 
-#if PARALLEL
+#if Parallel
 #pragma omp parallel
 #endif
     {
-#if PARALLEL
+#if Parallel
 #pragma omp for
 #endif
       for (int i = 0; i < (int)mol.size (); i++)
         mol[i].Move (mol, delta_t);
 
-#if PARALLEL
+#if Parallel
 #pragma omp for
 #endif
       for (int i = 0; i < (int)mol.size (); i++)
         mol[i].update ();
     }
 
-#if COLLISION
+#if Collision
     for (int i = 0; i < (int)mol.size (); i++)
       mol[i].collision (mol, i);
 #endif
 
-#if PARALLEL
+#if Parallel
 #pragma omp parallel
 #endif
     {
-#if PARALLEL
+#if Parallel
 #pragma omp for
 #endif
       for (int i = 0; i < (int)mol.size (); i++)
@@ -66,13 +72,13 @@ void Draw (void)
       }
     }
       glPixelZoom (Scale, Scale);
-      glDrawPixels (WIDTH, HEIGHT, GL_BGR_EXT, GL_UNSIGNED_BYTE, Image);
+      glDrawPixels (Width, Height, GL_BGR_EXT, GL_UNSIGNED_BYTE, Image);
 
-#if PARALLEL
+#if Parallel
 #pragma omp parallel
 #endif
     {
-#if PARALLEL
+#if Parallel
 #pragma omp for
 #endif
       for (int i = 0; i < (int)mol.size (); i++)
@@ -104,6 +110,8 @@ void Keyboard (byte Key, int x, int y)
     return;
 
   default:
+    break;
+
   case 27:
     exit (EXIT_SUCCESS);
   }
@@ -113,7 +121,7 @@ void main ( int argc, char *argv[] )
 {
   char r[30];
   FILE *set;
-  int NumOfMolecules;
+  int i;
 
   set = fopen ("settings.txt", "rt");
 
@@ -131,15 +139,36 @@ void main ( int argc, char *argv[] )
   }
 
   fscanf (set, "%d", &NumOfMolecules);
+  fscanf (set, "%dx%d", &Width, &Height);
+  fscanf (set, "%d%d%d", &Walls, &Collision, &Parallel);
 
   fclose (set);
 
+  Image = (byte ***)malloc (Height * sizeof (byte **));
+  if (Image == NULL)
+    exit (EXIT_FAILURE);
+
+  for (i = 0; i < Height; i++)
+  {
+    Image[i] = (byte **)malloc (Width * sizeof (byte));
+    if (Image[i] == NULL)
+    {
+      while (i--> 0)
+        free (Image[i]);
+      free (Image);
+
+      exit (EXIT_FAILURE);
+    }
+  }
+
+
   FreeConsole ();
 
-  sprintf_s (r, "%ldx%ld:32", WIDTH, HEIGHT);
+  sprintf_s (r, "%ldx%ld:32", Width, Height);
 
-  for (int i = 0; i < NumOfMolecules; i++)
-    mol.push_back(molecule(vec<double> (rand() % (WIDTH / 2) + (WIDTH / 4), rand() % (HEIGHT / 2) + (HEIGHT / 4)), (rand() % 10 + 2) * 1e15));
+  for (i = 0; i < NumOfMolecules; i++)
+    mol.push_back(molecule(vec<double> (rand() % (Width / 2) + (Width / 4), rand() % (Height / 2) + (Height / 4)),
+                  (rand() % 10 + 2) * 1e15, Width, Height, Walls));
 
   glutInit (&argc, argv);
   glutInitDisplayMode (GLUT_RGB);

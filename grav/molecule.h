@@ -13,8 +13,10 @@ class molecule
 public:
   double mass;
   vec<double> Pos, Speed, newPos, newSpeed;
+  int Height, Width;
+  bool Walls;
 
-  molecule (vec<double> P, double m) : Pos(P), mass(m), Speed(vec<double>(0, 0))
+  molecule (vec<double> P, double m, int W, int H, bool borders) : Pos (P), mass (m), Speed (vec<double> (0, 0)), Height (H), Width (W), Walls (borders)
   {}
 
   void Move (vector<molecule> m, double delta_t)
@@ -36,33 +38,33 @@ public:
       }
     }
 
-#if WALLS
-    if (molecule::newPos.X >= WIDTH)
+    if (Walls)
     {
-      molecule::newPos.X = WIDTH - 1;
-      if (molecule::newSpeed.X > 0)
-        molecule::newSpeed.X *= -1;
+      if (molecule::newPos.X >= Width)
+      {
+        molecule::newPos.X = Width - 1;
+        if (molecule::newSpeed.X > 0)
+          molecule::newSpeed.X *= -1;
+      }
+      if (molecule::newPos.X < 0)
+      {
+        molecule::newPos.X = 0;
+        if (molecule::newSpeed.X < 0)
+          molecule::newSpeed.X *= -1;
+      }
+      if (molecule::newPos.Y >= Height)
+      {
+        molecule::newPos.Y = Height - 1;
+        if (molecule::newSpeed.Y > 0)
+          molecule::newSpeed.Y *= -1;
+      }
+      if (molecule::newPos.Y < 0)
+      {
+        molecule::newPos.Y = 0;
+        if (molecule::newSpeed.Y < 0)
+          molecule::newSpeed.Y *= -1;
+      }
     }
-    if (molecule::newPos.X < 0)
-    {
-      molecule::newPos.X = 0;
-      if (molecule::newSpeed.X < 0)
-        molecule::newSpeed.X *= -1;
-    }
-    if (molecule::newPos.Y >= HEIGHT)
-    {
-      molecule::newPos.Y = HEIGHT - 1;
-      if (molecule::newSpeed.Y > 0)
-        molecule::newSpeed.Y *= -1;
-    }
-    if (molecule::newPos.Y < 0)
-    {
-      molecule::newPos.Y = 0;
-      if (molecule::newSpeed.Y < 0)
-        molecule::newSpeed.Y *= -1;
-    }
-#endif
-
   }
 
   void update ()
