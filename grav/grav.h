@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 #define G 6.67384e-11
+#define NumOfColors 3
 
 typedef unsigned char byte;
 

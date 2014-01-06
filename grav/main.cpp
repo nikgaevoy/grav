@@ -6,6 +6,7 @@
 #include "molecule.h"
 #include "timer.h"
 #include "color.h"
+#include "img.h"
 
 byte ***Image;
 std::vector<molecule> mol;
@@ -121,7 +122,7 @@ void main ( int argc, char *argv[] )
 {
   char r[30];
   FILE *set;
-  int i;
+  int i, w, p, c;
 
   set = fopen ("settings.txt", "rt");
 
@@ -140,26 +141,13 @@ void main ( int argc, char *argv[] )
 
   fscanf (set, "%d", &NumOfMolecules);
   fscanf (set, "%dx%d", &Width, &Height);
-  fscanf (set, "%d%d%d", &Walls, &Collision, &Parallel);
+  fscanf (set, "%d%d%d", &w, &c, &p);
+
+  Walls = !!w;
+  Collision = !!c;
+  Parallel = !!p;
 
   fclose (set);
-
-  Image = (byte ***)malloc (Height * sizeof (byte **));
-  if (Image == NULL)
-    exit (EXIT_FAILURE);
-
-  for (i = 0; i < Height; i++)
-  {
-    Image[i] = (byte **)malloc (Width * sizeof (byte));
-    if (Image[i] == NULL)
-    {
-      while (i--> 0)
-        free (Image[i]);
-      free (Image);
-
-      exit (EXIT_FAILURE);
-    }
-  }
 
 
   FreeConsole ();
@@ -173,9 +161,9 @@ void main ( int argc, char *argv[] )
   glutInit (&argc, argv);
   glutInitDisplayMode (GLUT_RGB);
 
-	glutGameModeString(r);
-	if (glutGameModeGet(GLUT_GAME_MODE_POSSIBLE)) 
-		glutEnterGameMode();
+  glutGameModeString(r);
+  if (glutGameModeGet(GLUT_GAME_MODE_POSSIBLE)) 
+    glutEnterGameMode();
   else
   {
     FILE *f;
@@ -186,6 +174,21 @@ void main ( int argc, char *argv[] )
 
     return;
   }
+
+  img I (Width, Height);
+
+  if (!I.IsInit ())
+  {
+    FILE *f;
+
+    f = fopen ("error.txt", "wt");
+    fprintf (f, "No memory!\n");
+    fclose (f);
+
+    return;
+  }
+
+  Image = I.Src;
 
   glutDisplayFunc (Draw);
   glutKeyboardFunc (Keyboard);

@@ -94,6 +94,7 @@
   <ItemGroup>
     <ClInclude Include="color.h" />
     <ClInclude Include="grav.h" />
+    <ClInclude Include="img.h" />
     <ClInclude Include="molecule.h" />
     <ClInclude Include="timer.h" />
     <ClInclude Include="vec.h" />
