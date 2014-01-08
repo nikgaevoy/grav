@@ -14,9 +14,10 @@ public:
   double mass;
   vec<double> Pos, Speed, newPos, newSpeed;
   int Height, Width;
-  bool Walls;
+  bool Walls, Collapse;
 
-  molecule (vec<double> P, double m, int W, int H, bool borders) : Pos (P), mass (m), Speed (vec<double> (0, 0)), Height (H), Width (W), Walls (borders)
+  molecule (vec<double> P, double m, int W, int H, bool borders, bool canCollapse) 
+    : Pos (P), mass (m), Speed (vec<double> (0, 0)), Height (H), Width (W), Walls (borders), Collapse (canCollapse)
   {}
 
   void Move (vector<molecule> m, double delta_t)
@@ -75,26 +76,14 @@ public:
 
   void collision (vector<molecule> &m, int num)
   {
-    //unsigned int i = 0;
-
-    //for (vector<molecule>::iterator it = m.begin(); it != m.end(); ++it, i++)
-    //  if (i != num && abs((int)it->Pos.X - (int)m[num].Pos.X) < 2 && abs((int)it->Pos.Y - (int)m[num].Pos.Y) < 2)
-    //  {
-    //    m[num].Pos = it->Pos;
-    //    m[num].Speed = (m[i].Speed * m[i].mass + m[num].Speed * m[num].mass) / (m[i].mass + m[num].mass);
-    //    m.erase(it);
-    //    return true;
-    //  }
-
-    //return false;
-
-    for (unsigned int i = num + 1; i < m.size (); i++)
-      if (abs ((int)m[i].Pos.X - (int)m[num].Pos.X) < 2 && abs ((int)m[i].Pos.Y - (int)m[num].Pos.Y) < 2)
-      {
-        vector<molecule>::iterator it = m.begin () + i;
-        m.erase (it);
-        i--;
-      }
+    if (Collapse)
+      for (unsigned int i = num + 1; i < m.size (); i++)
+        if (abs ((int)m[i].Pos.X - (int)m[num].Pos.X) < 2 && abs ((int)m[i].Pos.Y - (int)m[num].Pos.Y) < 2)
+        {
+          vector<molecule>::iterator it = m.begin () + i;
+          m.erase (it);
+          i--;
+        }
   }
 };
 

@@ -25,7 +25,17 @@ public:
 
   byte *set (int x, int y, int c)
   {
-    return &Src[y * Width * Height + x * Height + c];
+    return &Src[y * Width * NumOfColors + x * NumOfColors + c];
+  }
+
+  void SetColor (byte r, byte g, byte b)
+  {
+    for (int i = 0; i < Height * Width; i++)
+    {
+      Src[NumOfColors * i] = b;
+      Src[NumOfColors * i + 1] = g;
+      Src[NumOfColors * i + 2] = r;
+    }
   }
 
   bool IsInit ()

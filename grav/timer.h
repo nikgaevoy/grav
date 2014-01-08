@@ -5,16 +5,16 @@
 
 class timer
 {
-  long t;
+  clock_t t;
 public:
 
-  timer () : t(clock())
+  timer () : t (clock ())
   {}
 
   double update ()
   {
-    double rez = ((double)(clock() - timer::t))/ CLOCKS_PER_SEC;
-    timer::t = clock();
+    double rez = ((double)(clock () - timer::t)) / CLOCKS_PER_SEC;
+    timer::t = clock ();
     return rez;
   }
 };
