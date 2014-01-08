@@ -8,13 +8,13 @@
 #include "color.h"
 #include "img.h"
 
-byte ***Image;
 std::vector<molecule> mol;
 float Scale = 1;
 bool IsPause = 0;
 int NumOfMolecules, Width, Height;
 double Delay;
 bool Walls, Parallel, Collision;
+img *Image;
 
 bool IsInField (int x, int y)
 {
@@ -66,14 +66,14 @@ void Draw (void)
 
         if (IsInField (x, y))
         {
-          Image[y][x][0] = MAIN_COLOR_B + COLOR_SHIFT_B * (mol[i].mass / 1e15);
-          Image[y][x][1] = MAIN_COLOR_G + COLOR_SHIFT_G * (mol[i].mass / 1e15);
-          Image[y][x][2] = MAIN_COLOR_R + COLOR_SHIFT_R * (mol[i].mass / 1e15);
+          *(Image->set (x, y, 0)) = MAIN_COLOR_B + COLOR_SHIFT_B * (mol[i].mass / 1e15);
+          *(Image->set (x, y, 1)) = MAIN_COLOR_G + COLOR_SHIFT_G * (mol[i].mass / 1e15);
+          *(Image->set (x, y, 2)) = MAIN_COLOR_R + COLOR_SHIFT_R * (mol[i].mass / 1e15);
         }
       }
     }
       glPixelZoom (Scale, Scale);
-      glDrawPixels (Width, Height, GL_BGR_EXT, GL_UNSIGNED_BYTE, Image);
+      glDrawPixels (Width, Height, GL_BGR_EXT, GL_UNSIGNED_BYTE, Image->Src);
 
 #if Parallel
 #pragma omp parallel
@@ -88,9 +88,9 @@ void Draw (void)
 
         if (IsInField (x, y))
         {
-          Image[y][x][0] = LOOP_COLOR_B;
-          Image[y][x][1] = LOOP_COLOR_G;
-          Image[y][x][2] = LOOP_COLOR_R;
+          *(Image->set (x, y, 0)) = LOOP_COLOR_B;
+          *(Image->set (x, y, 1)) = LOOP_COLOR_G;
+          *(Image->set (x, y, 2)) = LOOP_COLOR_R;
         }
       }
     }
@@ -149,6 +149,18 @@ void main ( int argc, char *argv[] )
 
   fclose (set);
 
+  Image = new img (Width, Height);
+
+  if (!Image->IsInit ())
+  {
+    FILE *f;
+
+    f = fopen ("error.txt", "wt");
+    fprintf (f, "No memory!\n");
+    fclose (f);
+
+    return;
+  }
 
   FreeConsole ();
 
@@ -174,21 +186,6 @@ void main ( int argc, char *argv[] )
 
     return;
   }
-
-  img I (Width, Height);
-
-  if (!I.IsInit ())
-  {
-    FILE *f;
-
-    f = fopen ("error.txt", "wt");
-    fprintf (f, "No memory!\n");
-    fclose (f);
-
-    return;
-  }
-
-  Image = I.Src;
 
   glutDisplayFunc (Draw);
   glutKeyboardFunc (Keyboard);
