@@ -1,6 +1,6 @@
-1024
-1920x1080
-0
-0
-0
-1000
+1024     			// Number of molecules
+1920x1080			// Resolution
+0        			// Walls
+0        			// Collision
+1        			// Parallel
+1000     			// Delay

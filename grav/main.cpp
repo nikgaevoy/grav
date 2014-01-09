@@ -165,9 +165,17 @@ void main ( int argc, char *argv[] )
   }
 
   fscanf (set, "%d", &NumOfMolecules);
+  while (getc (set) != '\n');
   fscanf (set, "%dx%d", &Width, &Height);
-  fscanf (set, "%d%d%d", &w, &c, &p);
+  while (getc (set) != '\n');
+  fscanf (set, "%d", &w);
+  while (getc (set) != '\n');
+  fscanf (set, "%d", &c);
+  while (getc (set) != '\n');
+  fscanf (set, "%d", &p);
+  while (getc (set) != '\n');
   fscanf (set, "%lf", &Delay);
+  while (getc (set) != '\n');
 
   Walls = !!w;
   Collision = !!c;
