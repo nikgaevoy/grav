@@ -43,5 +43,8 @@
     <Text Include="settings.txt">
       <Filter>Resource Files</Filter>
     </Text>
+    <Text Include="color.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>

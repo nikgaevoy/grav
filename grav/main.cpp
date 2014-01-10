@@ -16,6 +16,11 @@ double Delay;
 bool Walls, Parallel, Collision;
 img *Image;
 
+int LoopColorR = DEFAULT_LOOP_COLOR_R, LoopColorG = DEFAULT_LOOP_COLOR_G, LoopColorB = DEFAULT_LOOP_COLOR_B;
+int MainColorR = DEFAULT_MAIN_COLOR_R, MainColorG = DEFAULT_MAIN_COLOR_G, MainColorB = DEFAULT_MAIN_COLOR_B;
+int ColorShiftR = DEFAULT_COLOR_SHIFT_R, ColorShiftG = DEFAULT_COLOR_SHIFT_G, ColorShiftB = DEFAULT_COLOR_SHIFT_B;
+int ColorTresholdR = DEFAULT_COLOR_TRESHOLD_R, ColorTresholdG = DEFAULT_COLOR_TRESHOLD_G, ColorTresholdB = DEFAULT_COLOR_TRESHOLD_B;
+
 bool IsInField (int x, int y)
 {
   return (x >= 0 && x < Width && y >= 0 && y < Height);
@@ -56,9 +61,9 @@ void Draw (void)
 
           if (IsInField (x, y))
           {
-            *(Image->set (x, y, 0)) = MAIN_COLOR_B + COLOR_SHIFT_B * (mol[i].mass / 1e15);
-            *(Image->set (x, y, 1)) = MAIN_COLOR_G + COLOR_SHIFT_G * (mol[i].mass / 1e15);
-            *(Image->set (x, y, 2)) = MAIN_COLOR_R + COLOR_SHIFT_R * (mol[i].mass / 1e15);
+            *(Image->set (x, y, 0)) = MainColorB + ColorShiftB * (mol[i].mass / 1e15);
+            *(Image->set (x, y, 1)) = MainColorG + ColorShiftG * (mol[i].mass / 1e15);
+            *(Image->set (x, y, 2)) = MainColorR + ColorShiftR * (mol[i].mass / 1e15);
           }
         }
       }
@@ -74,9 +79,9 @@ void Draw (void)
 
           if (IsInField (x, y))
           {
-            *(Image->set (x, y, 0)) = LOOP_COLOR_B;
-            *(Image->set (x, y, 1)) = LOOP_COLOR_G;
-            *(Image->set (x, y, 2)) = LOOP_COLOR_R;
+            *(Image->set (x, y, 0)) = LoopColorB;
+            *(Image->set (x, y, 1)) = LoopColorG;
+            *(Image->set (x, y, 2)) = LoopColorR;
           }
         }
       }
@@ -98,9 +103,9 @@ void Draw (void)
 
         if (IsInField (x, y))
         {
-          *(Image->set (x, y, 0)) = MAIN_COLOR_B + COLOR_SHIFT_B * (mol[i].mass / 1e15);
-          *(Image->set (x, y, 1)) = MAIN_COLOR_G + COLOR_SHIFT_G * (mol[i].mass / 1e15);
-          *(Image->set (x, y, 2)) = MAIN_COLOR_R + COLOR_SHIFT_R * (mol[i].mass / 1e15);
+          *(Image->set (x, y, 0)) = MainColorB + ColorShiftB * (mol[i].mass / 1e15);
+          *(Image->set (x, y, 1)) = MainColorG + ColorShiftG * (mol[i].mass / 1e15);
+          *(Image->set (x, y, 2)) = MainColorR + ColorShiftR * (mol[i].mass / 1e15);
         }
       }
       glPixelZoom (Scale, Scale);
@@ -112,9 +117,9 @@ void Draw (void)
 
         if (IsInField (x, y))
         {
-          *(Image->set (x, y, 0)) = LOOP_COLOR_B;
-          *(Image->set (x, y, 1)) = LOOP_COLOR_G;
-          *(Image->set (x, y, 2)) = LOOP_COLOR_R;
+          *(Image->set (x, y, 0)) = LoopColorB;
+          *(Image->set (x, y, 1)) = LoopColorG;
+          *(Image->set (x, y, 2)) = LoopColorR;
         }
       }
     }
@@ -146,7 +151,7 @@ void Keyboard (byte Key, int x, int y)
 void main ( int argc, char *argv[] )
 {
   char r[30];
-  FILE *set;
+  FILE *set, *col;
   int i, w, p, c;
 
   set = fopen ("settings.txt", "rt");
@@ -162,6 +167,41 @@ void main ( int argc, char *argv[] )
     fclose (f);
 
     return;
+  }
+
+  col = fopen ("color.txt", "rt");
+
+  if (col != NULL && getc (col) == '#')
+  {
+    fscanf (col, "%d", &LoopColorR);
+    while (getc (col) != '\n');
+    fscanf (col, "%d", &LoopColorG);
+    while (getc (col) != '\n');
+    fscanf (col, "%d", &LoopColorB);
+    while (getc (col) != '\n');
+
+    fscanf (col, "%d", &MainColorR);
+    while (getc (col) != '\n');
+    fscanf (col, "%d", &MainColorG);
+    while (getc (col) != '\n');
+    fscanf (col, "%d", &MainColorB);
+    while (getc (col) != '\n');
+
+    fscanf (col, "%d", &ColorShiftR);
+    while (getc (col) != '\n');
+    fscanf (col, "%d", &ColorShiftG);
+    while (getc (col) != '\n');
+    fscanf (col, "%d", &ColorShiftB);
+    while (getc (col) != '\n');
+
+    fscanf (col, "%d", &ColorTresholdR);
+    while (getc (col) != '\n');
+    fscanf (col, "%d", &ColorTresholdG);
+    while (getc (col) != '\n');
+    fscanf (col, "%d", &ColorTresholdB);
+    while (getc (col) != '\n');
+
+    fclose (col);
   }
 
   fscanf (set, "%d", &NumOfMolecules);
@@ -182,6 +222,7 @@ void main ( int argc, char *argv[] )
   Parallel = !!p;
 
   fclose (set);
+  fclose (col);
 
   Image = new img (Width, Height);
 
@@ -196,7 +237,7 @@ void main ( int argc, char *argv[] )
     return;
   }
 
-  Image->SetColor (LOOP_COLOR_R, LOOP_COLOR_G, LOOP_COLOR_B);
+  Image->SetColor (LoopColorR, LoopColorG, LoopColorB);
 
   FreeConsole ();
 
