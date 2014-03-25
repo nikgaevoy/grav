@@ -3,6 +3,10 @@
 
 #include "grav.h"
 
+const byte DEFAULT_BACKGROUND_COLOR_R = 30;
+const byte DEFAULT_BACKGROUND_COLOR_G = 30;
+const byte DEFAULT_BACKGROUND_COLOR_B = 30;
+
 const byte DEFAULT_LOOP_COLOR_R = 30;
 const byte DEFAULT_LOOP_COLOR_G = 30;
 const byte DEFAULT_LOOP_COLOR_B = 30;

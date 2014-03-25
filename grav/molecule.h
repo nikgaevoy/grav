@@ -29,7 +29,7 @@ public:
 
     for (unsigned int i = 0; i < m.size(); i++)
     {
-      vec<double> tmp = (m[i].Pos - molecule::Pos).Normalizing();
+      vec<double> tmp = m[i].Pos - molecule::Pos;
 
       if (tmp.Len2() != 0)
       {

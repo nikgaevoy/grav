@@ -16,6 +16,7 @@ double Delay;
 bool Walls, Parallel, Collision;
 img *Image;
 
+int BackgroundColorR = DEFAULT_BACKGROUND_COLOR_R, BackgroundColorG = DEFAULT_BACKGROUND_COLOR_G, BackgroundColorB = DEFAULT_BACKGROUND_COLOR_B;
 int LoopColorR = DEFAULT_LOOP_COLOR_R, LoopColorG = DEFAULT_LOOP_COLOR_G, LoopColorB = DEFAULT_LOOP_COLOR_B;
 int MainColorR = DEFAULT_MAIN_COLOR_R, MainColorG = DEFAULT_MAIN_COLOR_G, MainColorB = DEFAULT_MAIN_COLOR_B;
 int ColorShiftR = DEFAULT_COLOR_SHIFT_R, ColorShiftG = DEFAULT_COLOR_SHIFT_G, ColorShiftB = DEFAULT_COLOR_SHIFT_B;
@@ -173,6 +174,13 @@ void main ( int argc, char *argv[] )
 
   if (col != NULL && getc (col) == '#')
   {
+    fscanf (col, "%d", &BackgroundColorR);
+    while (getc (col) != '\n');
+    fscanf (col, "%d", &BackgroundColorG);
+    while (getc (col) != '\n');
+    fscanf (col, "%d", &BackgroundColorB);
+    while (getc (col) != '\n');
+
     fscanf (col, "%d", &LoopColorR);
     while (getc (col) != '\n');
     fscanf (col, "%d", &LoopColorG);
@@ -222,7 +230,6 @@ void main ( int argc, char *argv[] )
   Parallel = !!p;
 
   fclose (set);
-  fclose (col);
 
   Image = new img (Width, Height);
 
@@ -237,11 +244,11 @@ void main ( int argc, char *argv[] )
     return;
   }
 
-  Image->SetColor (LoopColorR, LoopColorG, LoopColorB);
+  Image->SetColor (BackgroundColorR, BackgroundColorG, BackgroundColorB);
 
   FreeConsole ();
 
-  sprintf_s (r, "%ldx%ld:32", Width, Height);
+  sprintf_s (r, "%dx%d:32", Width, Height);
 
   for (i = 0; i < NumOfMolecules; i++)
     mol.push_back(molecule(vec<double> (rand() % (Width / 2) + (Width / 4), rand() % (Height / 2) + (Height / 4)),
@@ -260,6 +267,8 @@ void main ( int argc, char *argv[] )
     f = fopen ("error.txt", "wt");
     fprintf (f, "ERROR ENTERING FULLSCREEN MODE!\n");
     fclose(f);
+
+    delete Image;
 
     return;
   }
