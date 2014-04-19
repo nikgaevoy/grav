@@ -129,6 +129,7 @@ void Draw (void)
     Sleep(30);
 
   glFinish();
+  glutSwapBuffers();
   glutPostRedisplay();
 }
 
@@ -255,7 +256,7 @@ void main ( int argc, char *argv[] )
                   (rand() % 10 + 2) * 1e15, Width, Height, Walls, Collision));
 
   glutInit (&argc, argv);
-  glutInitDisplayMode (GLUT_RGB);
+  glutInitDisplayMode (GLUT_RGB | GLUT_DOUBLE);
 
   glutGameModeString(r);
   if (glutGameModeGet(GLUT_GAME_MODE_POSSIBLE)) 
