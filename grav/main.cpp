@@ -126,10 +126,18 @@ void Draw (void)
     }
   }
   else
-    Sleep(30);
+  {
+  Sleep(30);
+  glFinish();
+  return;
+  }
 
   glFinish();
   glutSwapBuffers();
+}
+
+void Idle()
+{
   glutPostRedisplay();
 }
 
@@ -147,10 +155,18 @@ void Keyboard (byte Key, int x, int y)
   case 27:
     delete Image;
     exit (EXIT_SUCCESS);
+
+  case '+':
+  Scale += 0.1;
+  break;
+
+  case '-':
+  Scale -= 0.1;
+  break;
   }
 }
 
-void main ( int argc, char *argv[] )
+void main (int argc, char *argv[])
 {
   char r[30];
   FILE *set, *col;
@@ -259,7 +275,7 @@ void main ( int argc, char *argv[] )
   glutInitDisplayMode (GLUT_RGB | GLUT_DOUBLE);
 
   glutGameModeString(r);
-  if (glutGameModeGet(GLUT_GAME_MODE_POSSIBLE)) 
+  if (glutGameModeGet(GLUT_GAME_MODE_POSSIBLE))
     glutEnterGameMode();
   else
   {
@@ -276,6 +292,7 @@ void main ( int argc, char *argv[] )
 
   glutDisplayFunc (Draw);
   glutKeyboardFunc (Keyboard);
+  glutIdleFunc(Idle);
 
   glutMainLoop();
 }
